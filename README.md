@@ -6,11 +6,11 @@ implementation of [lifetimes for mutable iterators](https://www.youtube.com/watc
 
 ```rs
 // doesnt work
-match self.slice.split_first_mut() { .. }
+let (..) = self.slice.split_first_mut();
 
 // works -- explicitly set new lifetime to &self.slice before replacing
 let slice = std::mem::replace(&mut self.slice, &mut []);
-match slice.split_first_mut() { .. }
+let (..) = slice.split_first_mut();
 ```
 
 ### running

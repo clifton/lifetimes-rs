@@ -6,13 +6,9 @@ impl<'a, T> Iterator for MyIterWrapper<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.slice.split_first() {
-            Some((elem, rest)) => {
-                self.slice = rest;
-                Some(elem)
-            }
-            None => None,
-        }
+        let (elem, rest) = self.slice.split_first()?;
+        self.slice = rest;
+        Some(elem)
     }
 }
 
@@ -24,15 +20,12 @@ impl<'iter, T> Iterator for MyMutableIterator<'iter, T> {
     type Item = &'iter mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
+        // lifetime hack
         let slice = std::mem::replace(&mut self.slice, &mut []);
 
-        match slice.split_first_mut() {
-            Some((elem, rest)) => {
-                self.slice = rest;
-                Some(elem)
-            }
-            None => None,
-        }
+        let (elem, rest) = slice.split_first_mut()?;
+        self.slice = rest;
+        Some(elem)
     }
 }
 
@@ -77,7 +70,7 @@ mod tests {
         for elem in wrapper {
             *elem = *elem + 1;
         }
-        assert_eq!(*collection.get(0).unwrap(), 1, "cant mutate in place");
+        assert_eq!(*collection.get(0).unwrap(), 1, "can mutate in place");
 
         // empty
         let empty_wrapper = MyMutableIterator::<usize> {
